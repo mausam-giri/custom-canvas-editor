@@ -10,6 +10,7 @@ import {
   FaItalic,
   FaStrikethrough,
   FaUnderline,
+  FaSave,
 } from "react-icons/fa";
 import {
   FaA,
@@ -19,6 +20,7 @@ import {
   FaRegTrashCan,
   FaClone,
   FaT,
+  FaArrowLeft,
 } from "react-icons/fa6";
 import { GoArrowDown, GoArrowUp } from "react-icons/go";
 import { IoMdLock } from "react-icons/io";
@@ -53,6 +55,8 @@ export const FontSizeIcon = BiFontSize;
 export const FontWeightIcon = BiFont;
 export const FontFamilyIcon = BiFontFamily;
 export const LineHeightIcon = RiLineHeight;
+export const SaveIcon = FaSave;
+export const BackIcon = FaArrowLeft;
 
 // FaBold as BoldIcon,
 //   FaItalic as ItalicIcon,
