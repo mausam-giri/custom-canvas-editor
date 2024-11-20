@@ -25,8 +25,8 @@ export default function CertificateEditor() {
 
   function initializeCanvas() {
     const initialCanvas = new Canvas("editor-canvas", {
-      width: 1000,
-      height: 500,
+      width: 778,
+      height: 550,
     });
 
     initialCanvas.backgroundColor = "#fff";

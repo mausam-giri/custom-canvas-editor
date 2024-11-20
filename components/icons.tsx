@@ -11,6 +11,7 @@ import {
   FaStrikethrough,
   FaUnderline,
   FaSave,
+  FaImage,
 } from "react-icons/fa";
 import {
   FaA,
@@ -57,6 +58,7 @@ export const FontFamilyIcon = BiFontFamily;
 export const LineHeightIcon = RiLineHeight;
 export const SaveIcon = FaSave;
 export const BackIcon = FaArrowLeft;
+export const ExportIcon = FaImage;
 
 // FaBold as BoldIcon,
 //   FaItalic as ItalicIcon,

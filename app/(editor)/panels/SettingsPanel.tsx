@@ -119,14 +119,24 @@ export default function SettingsPanel(props: { activeObject: FabricObject }) {
   };
 
   function handleObjectModified(event: ModifiedEvent<TPointerEvent>) {
-    const modifiedObject = event.target;
-    updateActiveObjectPropsFromCanvas(modifiedObject);
+    const modifiedObject = event.transform?.target;
+    try {
+      if (modifiedObject) {
+        updateActiveObjectPropsFromCanvas(modifiedObject);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   function handleObjectScaling(event: BasicTransformEvent<TPointerEvent>) {
     const modifiedObject = event.transform.target;
 
-    updateActiveObjectPropsFromCanvas(modifiedObject);
+    try {
+      updateActiveObjectPropsFromCanvas(modifiedObject);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   useEffect(() => {

@@ -61,22 +61,66 @@ export default function CanvasSettings() {
     inputColorRef.current?.click();
   }
 
-  function uploadBackgroundImage(e: ChangeEvent<HTMLInputElement>) {
+  // function uploadBackgroundImage(e: ChangeEvent<HTMLInputElement>) {
+  //   if (!e.target.files) return;
+
+  //   const file = e.target.files[0];
+  //   if (file.type.startsWith("image")) {
+  //     const url = URL.createObjectURL(file);
+  //     const imgElem = document.createElement("img");
+  //     imgElem.src = url;
+  //     imgElem.onload = () => {
+  //       const img = new FabricImage(imgElem, {
+  //         scaleX: canvas!.width / imgElem.width,
+  //         scaleY: canvas!.height / imgElem.height,
+  //       });
+  //       canvas?.set("backgroundImage", img);
+  //       canvas?.requestRenderAll();
+  //     };
+  //   } else {
+  //     alert("Invalid file chosen for background image. File must be an image.");
+  //   }
+  // }
+
+  async function uploadBackgroundImage(e: ChangeEvent<HTMLInputElement>) {
     if (!e.target.files) return;
 
     const file = e.target.files[0];
     if (file.type.startsWith("image")) {
-      const url = URL.createObjectURL(file);
-      const imgElem = document.createElement("img");
-      imgElem.src = url;
-      imgElem.onload = () => {
-        const img = new FabricImage(imgElem, {
-          scaleX: canvas!.width / imgElem.width,
-          scaleY: canvas!.height / imgElem.height,
+      // 1. Prepare the FormData object to send the file to the server
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        // 2. Send the file to the server via a POST request
+        const response = await fetch("/api/upload-image", {
+          method: "POST",
+          body: formData,
         });
-        canvas?.set("backgroundImage", img);
-        canvas?.requestRenderAll();
-      };
+
+        // 3. Handle the server response
+        if (!response.ok) {
+          throw new Error("Failed to upload the image.");
+        }
+
+        const data = await response.json();
+        const imageUrl = data.filePath; // The URL returned from the server
+
+        // 4. Create an img element and load the uploaded image
+        const imgElem = document.createElement("img");
+        imgElem.src = imageUrl;
+        imgElem.onload = () => {
+          // 5. Set the image as the background image on the canvas
+          const img = new FabricImage(imgElem, {
+            scaleX: canvas!.width / imgElem.width,
+            scaleY: canvas!.height / imgElem.height,
+          });
+          canvas?.set("backgroundImage", img);
+          canvas?.requestRenderAll();
+        };
+      } catch (error) {
+        alert("Error uploading the image: " + error);
+      }
     } else {
       alert("Invalid file chosen for background image. File must be an image.");
     }

@@ -7,6 +7,7 @@ import {
   CircleIcon,
   CloneIcon,
   DeleteIcon,
+  ExportIcon,
   LineIcon,
   RectangleIcon,
   SaveIcon,
@@ -18,6 +19,7 @@ import { ActiveSelection } from "fabric";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { saveAs } from "file-saver";
 
 const TOOL_TYPE_MAPPER: Record<string, string> = {
   rect: "Rectangle",
@@ -31,7 +33,7 @@ export default function ToolbarPanel() {
   const router = useRouter();
   const params = useSearchParams();
   const userId = params.get("_p");
-  // const name = params.get("_r");
+  const name = params.get("_r");
   const id = params.get("_m");
 
   const canvas = useContext(CanvasContext);
@@ -103,7 +105,9 @@ export default function ToolbarPanel() {
 
   useEffect(() => {
     if (canvasJson) {
-      canvas?.loadFromJSON(canvasJson);
+      canvas?.loadFromJSON(canvasJson, () => {
+        canvas.renderAll();
+      });
     }
   }, [canvasJson]);
 
@@ -126,58 +130,52 @@ export default function ToolbarPanel() {
 
   async function saveObject() {
     const jsonData = JSON.stringify(canvas);
+    console.log(jsonData);
     const requestData = {
       userId: userId,
       id: id,
       templateData: jsonData,
     };
-    // const response = await fetch("/api/save", {
-    //   method: "POST",
-    //   body: JSON.stringify(requestData),
-    // });
 
-    // if (response.ok) {
-    //   toast.success("Template saved successfully");
-    //   const data = await response.json();
-    //   console.log(data);
-    // } else {
-    //   toast.error("Something went wrong saving template");
-    // }
-    toast.promise(
-      fetch("/api/save", {
-        method: "POST",
-        body: JSON.stringify(requestData),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then(async (response) => {
-        if (!response.ok) {
-          throw new Error("Failed to save the template");
+    try {
+      const response = await toast.promise(
+        fetch("/api/save", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        }),
+        {
+          loading: "Saving your template...",
+          success: "Template saved successfully!",
+          error: "Failed to save the template. Please try again.",
         }
-        return response.json(); // Parse JSON response if successful
-      }),
-      {
-        loading: "Saving template...",
-        success: "Template saved successfully!",
-        error: "Something went wrong saving the template",
-      }
-    );
+      );
+
+      const data = await response.json();
+      console.log("Save response:", data);
+      return data;
+    } catch (error) {
+      console.error("Error saving template:", error);
+      throw error;
+    }
   }
 
   async function saveAndClose() {
-    await toast.promise(saveObject(), {
-      loading: "Saving your template...",
-      success: "Template saved successfully!",
-      error: "Failed to save the template",
-    });
+    try {
+      await saveObject();
 
-    // Show a separate toast for redirecting
-    toast("Redirecting to templates...", {
-      icon: "➡️",
-    });
+      toast("Template saved successfully! Redirecting to templates...", {
+        icon: "➡️",
+      });
 
-    // Redirect to the desired page
-    router.push("/dashboard/templates");
+      setTimeout(() => {
+        router.push("/dashboard/templates");
+      }, 1000);
+    } catch (error) {
+      console.error("Error during save and close:", error);
+    }
   }
 
   async function cloneObject() {
@@ -228,6 +226,23 @@ export default function ToolbarPanel() {
     }
   }, [canvas, canvasKeyboardListener]);
 
+  function exportToImage() {
+    if (canvas) {
+      const dataUrl = canvas.toDataURL({
+        format: "png",
+        quality: 1.0,
+        multiplier: 1.5,
+      });
+      // format: format === "jpg" ? "jpeg" : "png",
+      // quality: 1.0,
+      saveAs(
+        dataUrl,
+        `${name}-${new Date().toLocaleDateString()}-Pramman-Patra.png`
+      );
+      toast.success("Exported to png");
+    }
+  }
+
   return (
     <div className="select-none mt-1 mx-auto border border-gray-300 w-fit px-2 py-1 rounded-lg shadow-md flex items-center">
       <div className="flex gap-1 items-center text-gray-700">
@@ -265,6 +280,15 @@ export default function ToolbarPanel() {
         >
           Save & Close
         </button>
+      </div>
+      <span className="px-2 text-gray-500">|</span>
+      <div className="flex gap-2 items-center text-gray-700">
+        <ToolbarIcon
+          icon={ExportIcon}
+          // className="text-blue-500 bg-blue-50 hover:text-blue-500 hover:bg-blue-100"
+          title="Save"
+          onClick={exportToImage}
+        />
       </div>
     </div>
   );
