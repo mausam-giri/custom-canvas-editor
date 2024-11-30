@@ -12,11 +12,9 @@ export default function ImageTool() {
     if (event.target.files) {
       const file = event.target.files[0];
 
-      // Create FormData to send the file to the server
       const formData = new FormData();
       formData.append("image", file);
 
-      // Send the file to the server via the App Router API
       const response = await fetch("/api/upload-image", {
         method: "POST",
         body: formData,
@@ -24,10 +22,9 @@ export default function ImageTool() {
       console.log(response);
       if (response.ok) {
         const data = await response.json();
-        const imgUrl = data.filePath; // Get the URL of the saved image
+        const imgUrl = data.filePath;
         console.log(imgUrl);
         const imgElem = document.createElement("img");
-        // document.body.appendChild(imgElem);
         imgElem.src = imgUrl;
         imgElem.crossOrigin = "anonymous";
         imgElem.onload = () => {
@@ -54,31 +51,6 @@ export default function ImageTool() {
       }
     }
   }
-
-  // function addImage(event: ChangeEvent<HTMLInputElement>) {
-  //   if (event.target.files) {
-  //     const file = event.target.files[0];
-  //     const imgUrl = URL.createObjectURL(file);
-  //     const imgElem = document.createElement("img");
-  //     imgElem.src = imgUrl;
-  //     imgElem.onload = () => {
-  //       const img = new FabricImage(imgElem, {
-  //         label: "Image",
-  //       });
-  //       const scaleFactor = Math.min(
-  //         canvas?.width! / img.width,
-  //         canvas?.height! / img.height
-  //       );
-  //       img.set({
-  //         scaleX: scaleFactor,
-  //         scaleY: scaleFactor,
-  //       });
-  //       canvas?.add(img);
-  //       canvas?.centerObject(img);
-  //       canvas?.setActiveObject(img);
-  //     };
-  //   }
-  // }
 
   return (
     <>

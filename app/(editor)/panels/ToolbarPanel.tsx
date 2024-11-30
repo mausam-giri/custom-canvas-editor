@@ -13,8 +13,8 @@ import {
   SaveIcon,
   TextIcon,
 } from "@/components/icons";
-import ImageTool from "./tools/ImageTool";
-import ToolbarComponent from "./tools/ToolbarComponent";
+import ImageTool from "../tools/ImageTool";
+import ToolbarComponent from "../tools/ToolbarComponent";
 import { ActiveSelection } from "fabric";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
@@ -37,64 +37,39 @@ export default function ToolbarPanel() {
   const id = params.get("_m");
 
   const canvas = useContext(CanvasContext);
-  const [canvasJson, setCanvasJson] = useState();
-
-  // async function fetchCanvasData() {
-  //   const response = await fetch("/api/get-data", {
-  //     method: "POST",
-  //     body: JSON.stringify({
-  //       userId: userId,
-  //       id: id,
-  //     }),
-  //   });
-  //   if (response.ok) {
-  //     console.log(response);
-  //     const data = await response.json();
-  //     console.log("fetch template data", data.message?.message?.[0]);
-  //     const templateData = data.message.message?.[0];
-  //     setCanvasJson(templateData);
-  //   } else {
-  //     return {};
-  //   }
-  // }
-  // useEffect(() => {
-  //   fetchCanvasData();
-  // }, [userId, id]);
+  const [canvasJson, setCanvasJson] = useState("{}");
 
   async function fetchCanvasData() {
-    // Wrap fetch operation in toast.promise for better user feedback
-    const fetchPromise = fetch("/api/get-data", {
-      method: "POST",
-      body: JSON.stringify({
-        userId: userId,
-        id: id,
-      }),
-    }).then(async (response) => {
-      if (response.ok) {
-        const data = await response.json();
-        console.log("fetch template data", data.message?.message?.[0]);
-        const templateData = data.message.message?.[0];
-        setCanvasJson(templateData);
-        return data; // Successfully fetched data
-      } else {
-        throw new Error("Failed to fetch data"); // Trigger error state
-      }
-    });
+    try {
+      const fetchPromise = fetch(
+        "http://localhost:3001/api/editor/get-template",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            userId: userId,
+            id: id,
+          }),
+        }
+      ).then(async (response) => {
+        if (response.ok) {
+          const result = await response.json();
+          const templateData = result.data;
+          const { canvasWidth, canvasHeight, canvasObjectData } = templateData;
+          if (!canvasHeight || !canvasWidth || !canvasObjectData)
+            throw Error("Invalid template data");
+          canvas?.setDimensions({ width: canvasWidth, height: canvasHeight });
+          setCanvasJson(templateData.canvasObjectData);
+          return result;
+        } else {
+          throw new Error("Failed to fetch data");
+        }
+      });
 
-    toast.promise(
-      fetchPromise,
-      {
+      toast.promise(fetchPromise, {
         loading: "Fetching canvas data...",
         success: "Canvas data loaded successfully!",
         error: "Failed to load canvas data.",
-      },
-      {
-        duration: 2000,
-      }
-    );
-
-    try {
-      await fetchPromise;
+      });
     } catch (error) {
       console.error("Error fetching canvas data:", error);
     }
@@ -128,18 +103,21 @@ export default function ToolbarPanel() {
     canvas.requestRenderAll();
   }
 
-  async function saveObject() {
-    const jsonData = JSON.stringify(canvas);
-    console.log(jsonData);
-    const requestData = {
-      userId: userId,
-      id: id,
-      templateData: jsonData,
-    };
-
+  // Save template
+  async function saveTemplate() {
     try {
+      const jsonData = canvas?.toJSON();
+      const requestData = {
+        userId: userId,
+        id: id,
+        templateData: {
+          canvasWidth: canvas?.getWidth(),
+          canvasHeight: canvas?.getHeight(),
+          canvasObjectData: jsonData,
+        },
+      };
       const response = await toast.promise(
-        fetch("/api/save", {
+        fetch("/api/save-template", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -147,24 +125,23 @@ export default function ToolbarPanel() {
           body: JSON.stringify(requestData),
         }),
         {
-          loading: "Saving your template...",
+          loading: "Saving template...",
           success: "Template saved successfully!",
           error: "Failed to save the template. Please try again.",
         }
       );
 
       const data = await response.json();
-      console.log("Save response:", data);
       return data;
     } catch (error) {
       console.error("Error saving template:", error);
-      throw error;
     }
   }
 
-  async function saveAndClose() {
+  // Save Template and Close
+  async function saveTemplateAndClose() {
     try {
-      await saveObject();
+      await saveTemplate();
 
       toast("Template saved successfully! Redirecting to templates...", {
         icon: "➡️",
@@ -207,7 +184,6 @@ export default function ToolbarPanel() {
   }
 
   function canvasKeyboardListener(event: KeyboardEvent) {
-    console.log("delting from keyboard");
     if (event.code == "Delete") deleteObject();
   }
 
@@ -239,12 +215,12 @@ export default function ToolbarPanel() {
         dataUrl,
         `${name}-${new Date().toLocaleDateString()}-Pramman-Patra.png`
       );
-      toast.success("Exported to png");
+      toast.success("Exported to PNG");
     }
   }
 
   return (
-    <div className="select-none mt-1 mx-auto border border-gray-300 w-fit px-2 py-1 rounded-lg shadow-md flex items-center">
+    <div className="bg-white select-none mt-1 mx-auto border border-gray-300 w-fit px-2 py-1 rounded-lg shadow-md flex items-center">
       <div className="flex gap-1 items-center text-gray-700">
         <ToolbarComponent
           toolType="rectangle"
@@ -272,10 +248,10 @@ export default function ToolbarPanel() {
           icon={SaveIcon}
           className="text-blue-500 bg-blue-50 hover:text-blue-500 hover:bg-blue-100"
           title="Save"
-          onClick={saveObject}
+          onClick={saveTemplate}
         />
         <button
-          onClick={saveAndClose}
+          onClick={saveTemplateAndClose}
           className="text-sm font-medium px-2.5 py-2 rounded-md text-blue-500 bg-blue-50 hover:text-blue-500 hover:bg-blue-100"
         >
           Save & Close
@@ -286,7 +262,7 @@ export default function ToolbarPanel() {
         <ToolbarIcon
           icon={ExportIcon}
           // className="text-blue-500 bg-blue-50 hover:text-blue-500 hover:bg-blue-100"
-          title="Save"
+          title="Export to PNG"
           onClick={exportToImage}
         />
       </div>

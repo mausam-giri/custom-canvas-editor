@@ -54,7 +54,9 @@ export default function CanvasPanel(props: {
   return (
     <>
       <div>
-        <div className="grid grid-cols-2 border-b">{renderTabs()}</div>
+        <div className="grid grid-cols-2 border-b rounded-t-md overflow-hidden">
+          {renderTabs()}
+        </div>
         <div className="p-3">{renderContent()}</div>
       </div>
     </>

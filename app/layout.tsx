@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Praman Patra",
@@ -14,9 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className="antialiased bg-gray-200">
         {children}
-        <Toaster />
+        <Toaster closeButton richColors />
       </body>
     </html>
   );

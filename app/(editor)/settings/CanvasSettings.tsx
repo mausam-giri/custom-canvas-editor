@@ -13,7 +13,7 @@ export default function CanvasSettings() {
   const [canvasWidth, setCanvasWidth] = useState<number>(0);
   const [canvasBackgroundColor, setCanvasBackgroundColor] = useState<
     string | TFiller
-  >("");
+  >("#ffffff");
 
   useEffect(() => {
     if (canvas) {
@@ -46,9 +46,11 @@ export default function CanvasSettings() {
     if (canvasWidth < 200 || canvasHeight < 200) return;
 
     if (canvas) {
-      console.log(canvasWidth, canvasHeight);
-      canvas.setWidth(canvasWidth);
-      canvas.setHeight(canvasHeight);
+      // console.log(canvasWidth, canvasHeight);
+      canvas.setDimensions({
+        width: canvasWidth,
+        height: canvasHeight,
+      });
       canvas.requestRenderAll();
     }
   }
@@ -87,30 +89,25 @@ export default function CanvasSettings() {
 
     const file = e.target.files[0];
     if (file.type.startsWith("image")) {
-      // 1. Prepare the FormData object to send the file to the server
       const formData = new FormData();
       formData.append("image", file);
 
       try {
-        // 2. Send the file to the server via a POST request
         const response = await fetch("/api/upload-image", {
           method: "POST",
           body: formData,
         });
 
-        // 3. Handle the server response
         if (!response.ok) {
           throw new Error("Failed to upload the image.");
         }
 
         const data = await response.json();
-        const imageUrl = data.filePath; // The URL returned from the server
+        const imageUrl = data.filePath;
 
-        // 4. Create an img element and load the uploaded image
         const imgElem = document.createElement("img");
         imgElem.src = imageUrl;
         imgElem.onload = () => {
-          // 5. Set the image as the background image on the canvas
           const img = new FabricImage(imgElem, {
             scaleX: canvas!.width / imgElem.width,
             scaleY: canvas!.height / imgElem.height,

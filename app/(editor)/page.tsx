@@ -1,22 +1,18 @@
 "use client";
 
 import { CanvasContext } from "@/context/CanvasContext";
-import {
-  Canvas,
-  FabricObject,
-  InteractiveFabricObject,
-  TPointerEventInfo,
-  Point,
-} from "fabric";
+import { Canvas, FabricObject, InteractiveFabricObject } from "fabric";
 import { useEffect, useRef, useState } from "react";
-import ToolbarPanel from "./ToolbarPanel";
+import ToolbarPanel from "./panels/ToolbarPanel";
 import { v4 as getUniqueId } from "uuid";
 
 import fonts from "@/lib/fonts";
-import CanvasPanel from "./CanvasPanel";
+import CanvasPanel from "./panels/CanvasPanel";
 import ToolbarIcon from "@/components/ToolbarIcon";
 import { FaHome } from "react-icons/fa";
 import Link from "next/link";
+import { MapInteractionCSS } from "react-map-interaction";
+import { LuZoomIn, LuZoomOut } from "react-icons/lu";
 
 export default function CertificateEditor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -25,11 +21,12 @@ export default function CertificateEditor() {
 
   function initializeCanvas() {
     const initialCanvas = new Canvas("editor-canvas", {
-      width: 778,
-      height: 550,
+      width: 750,
+      height: 500,
+      backgroundColor: "#ffffff",
     });
 
-    initialCanvas.backgroundColor = "#fff";
+    // initialCanvas.backgroundColor = "#ffffff";
     initialCanvas.preserveObjectStacking = true;
 
     InteractiveFabricObject.ownDefaults = {
@@ -77,58 +74,7 @@ export default function CertificateEditor() {
 
   function selectionClearListener() {
     setActiveObject(null);
-  }
-
-  function zoomInListener(event: TPointerEventInfo<WheelEvent>) {
-    if (canvas) {
-      console.log(event, event.e.deltaY);
-      const currentVP = canvas.viewportTransform;
-      const delta: number = event.e.deltaY;
-      const currentZoom: number = canvas.getZoom();
-      const zoomDelta: number = 0.05;
-      const minAllowedZoom: number = 0.1; // 10 %
-      const maxAllowedZoom: number = 3; // 300 %
-
-      // new zoom
-      let zoom: number = currentZoom;
-
-      if (delta > 0) {
-        zoom -= zoomDelta;
-      } else {
-        zoom += zoomDelta;
-      }
-
-      // prevent label from going out of the canvas
-      const label: Object = canvas
-        .getObjects()
-        .filter((q: FabricObject) => q.type === "label")[0];
-
-      // if within allow range, zoom to point otherwise skip event
-      if (zoom >= minAllowedZoom && zoom <= maxAllowedZoom) {
-        const point: Point = new Point(event.e.offsetX, event.e.offsetY);
-
-        canvas.zoomToPoint(point, zoom);
-
-        // const isOnScreen: boolean = (label as FabricObject).isOnScreen();
-        // if (!isOnScreen) {
-        //   canvas.setViewportTransform(currentVP);
-        // }
-      }
-
-      event.e.preventDefault();
-      event.e.stopPropagation();
-    }
-  }
-
-  function zoomInListenerNew(event: TPointerEventInfo) {
-    if (canvas) {
-      const originalHeight = canvas.height;
-      const originalWidth = canvas.width;
-      // canvas.setDimensions(originalWidth * canvas.getZoom(), )
-      canvas.setWidth(originalWidth * canvas.getZoom());
-      canvas.setHeight(originalHeight * canvas.getZoom());
-      canvas.renderAll();
-    }
+    // canvas.focus()
   }
 
   useEffect(() => {
@@ -146,15 +92,6 @@ export default function CertificateEditor() {
       canvas.on("object:scaling", (event) =>
         handleObjectSelection(event.target)
       );
-      // canvas.on("mouse:wheel", zoomInListenerNew);
-      // canvas.on("mouse:move", (event) => {
-      //   console.log(
-      //     event.target?.getBoundingRect(),
-      //     event.viewportPoint.x,
-      //     event.viewportPoint.y
-      //   );
-      //   if (!event.target) canvas.setCursor("default");
-      // });
     }
 
     return () => {
@@ -170,6 +107,68 @@ export default function CertificateEditor() {
     };
   }, [canvas, selectionListener, selectionClearListener]);
 
+  const [isPanningEnabled, setIsPanningEnabled] = useState(false);
+  const [scale, setScale] = useState(1);
+  const [translation, setTranslation] = useState({ x: 0, y: 0 });
+
+  const zoomIn = () => {
+    setScale((prevScale) => prevScale + 0.1);
+  };
+
+  const zoomOut = () => {
+    setScale((prevScale) => Math.max(prevScale - 0.1, 0.1));
+  };
+
+  const resetZoom = () => {
+    setScale(1);
+    setTranslation({ x: 0, y: 0 });
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === " " || e.key === "h") {
+        setIsPanningEnabled(true);
+        document.body.style.cursor = "grab";
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === " " || e.key === "h") {
+        setIsPanningEnabled(false);
+        document.body.style.cursor = "default";
+      }
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (isPanningEnabled) {
+        document.body.style.cursor = "grabbing";
+      }
+
+      // Set focus to null to prevent triggering the last pressed button
+      (document.activeElement as HTMLElement)?.blur();
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      if (isPanningEnabled) {
+        document.body.style.cursor = "grab";
+      } else {
+        document.body.style.cursor = "default";
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isPanningEnabled]);
+
   return (
     <CanvasContext.Provider value={canvas}>
       <div
@@ -179,73 +178,99 @@ export default function CertificateEditor() {
       >
         <div>
           {/* Toolbar Region */}
-          <div className="absolute top-0 left-0  px-2 py-1 pb-3 z-[51]">
-            <div className="select-none mt-1 border border-gray-300 w-fit px-2 py-1 rounded-lg shadow-md flex items-center">
-              <Link
-                href="/dashboard/templates"
-                className="flex items-center text-sm rounded-md hover:bg-blue-50 hover:text-blue-500 cursor-pointer !px-1 !pr-2.5"
-              >
-                <ToolbarIcon
-                  icon={FaHome}
-                  // className="text-red-500 hover:text-red-500 hover:bg-red-100 "
-                  className="hover:!bg-blue-50"
-                  title="Delete"
-                  // onClick={goBackToTemplate}
-                />{" "}
-                Go Back
-              </Link>
-            </div>
+          <div className=" absolute top-0 left-0 mt-1 px-2 py-1 pb-3 z-[51]">
+            {/* <div className="select-none mt-1 border border-gray-300 w-fit px-2 py-1 rounded-lg shadow-md flex items-center"> */}
+            <Link
+              href="/dashboard/templates"
+              className="bg-white flex items-center text-sm rounded-lg hover:bg-blue-50 hover:text-blue-500 cursor-pointer  border border-gray-300 w-fit px-1 !pr-4 py-1 shadow-md"
+            >
+              <ToolbarIcon
+                icon={FaHome}
+                // className="text-red-500 hover:text-red-500 hover:bg-red-100 "
+                className="hover:!bg-blue-50"
+                title="Delete"
+                // onClick={goBackToTemplate}
+              />{" "}
+              Go Back
+            </Link>
+            {/* </div> */}
           </div>
+
           <div
-            className="absolute top-0 left-0 w-full px-2 py-1 pb-3 z-[50]"
+            className=" absolute top-0 left-0 w-full px-2 py-1 pb-3 z-[50]"
             id="toolbar-panel"
           >
             {canvasRef.current && <ToolbarPanel />}
           </div>
 
+          {/* Layers Region */}
+          <aside
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-64 px-3  z-50"
+            id="layers-panel"
+          >
+            <div className="border border-gray-300 rounded-md shadow-md bg-white max-h-[720px]">
+              <CanvasPanel activeObject={activeObject} />
+            </div>
+          </aside>
+
           {/* Canvas Editor Region */}
-          {/* <Suspense fallback={<Loading />}> */}
-          <main className="flex mt-20 pb-10 pr-24">
+
+          <MapInteractionCSS
+            disablePan={!isPanningEnabled}
+            disableZoom={false}
+            value={{ scale, translation }}
+            onChange={({ scale, translation }) => {
+              setScale(scale);
+              setTranslation(translation);
+            }}
+            minScale={0.5}
+            maxScale={2}
+          >
+            <div style={{ width: "100vw", height: "100vh" }}>
+              <div
+                className="h-full w-full flex items-center justify-center focus-visible:outline-none focus-visible:border-none"
+                id="workspace"
+                tabIndex={1000}
+              >
+                <canvas
+                  className="border shadow "
+                  id="editor-canvas"
+                  ref={canvasRef}
+                ></canvas>
+              </div>
+            </div>
+          </MapInteractionCSS>
+
+          <aside className="absolute bottom-2 right-0 mr-2">
+            <div className="bg-white py-1 px-2 rounded-md flex items-center gap-2">
+              <ToolbarIcon icon={LuZoomIn} onClick={zoomIn} />
+              <ToolbarIcon icon={LuZoomOut} onClick={zoomOut} />
+              <button
+                onClick={resetZoom}
+                className="px-2.5 py-2 text-sm rounded-md hover:bg-blue-100"
+              >
+                Reset
+              </button>
+              <span className="px-2 text-gray-500">|</span>
+              <p className="text-sm font-medium">{Math.round(scale * 100)}%</p>
+            </div>
+          </aside>
+
+          {/* <main className="flex mt-20 pb-0 pl-24">
             <div
               className="flex-1 flex items-center justify-center focus-visible:outline-none focus-visible:border-none"
               id="workspace"
               tabIndex={1000}
             >
               <canvas
-                className="border shadow"
+                className="border shadow "
                 id="editor-canvas"
                 ref={canvasRef}
               ></canvas>
             </div>
-          </main>
-          {/* </Suspense> */}
-
-          {/* Layers Region */}
-          <aside
-            className="absolute right-0 top-2 w-64 px-3  z-50"
-            id="layers-panel"
-          >
-            <div className="border rounded-md shadow-md bg-white max-h-[720px]">
-              <CanvasPanel activeObject={activeObject} />
-            </div>
-          </aside>
+          </main> */}
         </div>
       </div>
     </CanvasContext.Provider>
   );
-}
-
-{
-  /* Settings Region */
-}
-{
-  /* <aside
-            className="absolute left-0 top-10 w-64 px-3  z-50"
-            id="settings-panel"
-          >
-            <div className="p-3 pl-4 border rounded-md shadow-md bg-white max-h-[550px]">
-              {activeObject && <SettingsPanel activeObject={activeObject} />}{" "}
-              {!activeObject && <CanvasSettings />}
-            </div>
-          </aside> */
 }

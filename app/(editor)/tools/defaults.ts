@@ -1,5 +1,4 @@
 import { FabricObjectProps } from "fabric";
-import { v4 as getUniqueId } from "uuid";
 
 export function getRandomColor() {
   const letters = "01234567890ABCDEF";

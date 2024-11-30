@@ -114,7 +114,7 @@ export default function ColorPicker({ fill, onColorChange }: ColorpickerProps) {
           ></div>
         </div>
         {showColorpicker && (
-          <div className="absolute right-[105%] bottom-0">
+          <div className="absolute left-[105%] bottom-0">
             <div className="relative z-50 text-sm space-y-2 border shadow bg-white px-4 py-3 rounded-md">
               <div className="space-y-1">
                 <p>Colors</p>

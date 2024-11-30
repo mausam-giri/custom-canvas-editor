@@ -3,53 +3,55 @@ import path from "path";
 import { writeFile, mkdir } from "fs/promises";
 import { v4 as uuidv4 } from "uuid";
 
-// Ensure the uploads directory exists
-const ensureUploadsDirectory = async () => {
-  const uploadDir = path.join(process.cwd(), "public/uploads");
+const ensureUploadsDirectory = async (destinationPath: string) => {
+  const uploadDir = path.join(process.cwd(), destinationPath);
   try {
-    await mkdir(uploadDir, { recursive: true }); // Create the uploads folder if it doesn't exist
+    await mkdir(uploadDir, { recursive: true });
   } catch (err) {
-    console.log("Error creating uploads directory", err);
+    console.error("Error creating uploads directory", err);
     throw new Error("Error creating uploads directory");
   }
 };
 
 export async function POST(req: NextRequest) {
   try {
-    // Get the form data from the request
     const formData = await req.formData();
     const file = formData.get("image");
+    const userId = formData.get("userId") as string;
 
-    // console.log(file)
-    // If no file is received, return an error
-    if (!file || !(file instanceof File)) {
+    if (!file || !(file instanceof File) || !userId) {
       return NextResponse.json(
-        { error: "No valid file received." },
+        {
+          message: "Invalid data found.",
+          success: false,
+        },
         { status: 400 }
       );
     }
+    const destinationPath = `public/${userId}/uploads`;
+    await ensureUploadsDirectory(destinationPath);
 
-    // Ensure the uploads directory exists
-    await ensureUploadsDirectory();
-
-    // Convert the file to a buffer
     const buffer = Buffer.from(await file.arrayBuffer());
-
-    // Generate a unique filename using the current timestamp
     const filename = uuidv4() + "." + file.name.split(".").pop();
+    const filePath = `${process.env.BASE_URL}/${userId}/uploads/${filename}`;
 
-    // Save the file to the server
-    const filePath = `http://localhost:4000/uploads/${filename}`; // Full URL path including base URL
     await writeFile(
-      path.join(process.cwd(), "public/uploads", filename),
+      path.join(process.cwd(), destinationPath, filename),
       buffer
     );
-    // console.log(filename, filePath)
-
-    // Return success message with the full file path
-    return NextResponse.json({ message: "Success", filePath, status: 201 });
+    return NextResponse.json(
+      { data: filePath, success: true },
+      { status: 201 }
+    );
   } catch (error) {
-    console.log("Error occurred:", error);
-    return NextResponse.json({ message: "Failed", error: error, status: 500 });
+    console.error("Failed to save uploaded image:", error);
+    return NextResponse.json(
+      {
+        message: "Failed to save uploaded image",
+        details: error,
+        success: false,
+      },
+      { status: 500 }
+    );
   }
 }

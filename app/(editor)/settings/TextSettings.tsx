@@ -1,6 +1,6 @@
 "use client";
 import { FontFamilyIcon, FontWeightIcon } from "@/components/icons";
-import StringSetting from "./StringSetting";
+// import StringSetting from "./StringSetting";
 import {
   ActiveObjectProps,
   KeyOfActiveObject,
