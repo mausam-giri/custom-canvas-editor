@@ -21,3 +21,8 @@ export const getDefaultProps = (): Partial<FabricObjectProps> => {
     centeredRotation: true,
   };
 };
+
+export const defaultCanvasDimension = {
+  width: 750,
+  height: 500,
+};

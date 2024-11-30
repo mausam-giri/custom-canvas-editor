@@ -1,3 +1,4 @@
+"use client";
 import { Canvas, FabricObject, CanvasOptions } from "fabric";
 import { createContext, useCallback, useContext, useState } from "react";
 
@@ -8,20 +9,29 @@ export interface CanvasTemplateDataOptions {
   canvasWidth: string;
   canvasHeight: string;
 }
-interface CanvasContextOptions {
+export interface CanvasContextOptions {
   canvas: Canvas | undefined;
-  initCanvas: (canvasEl: HTMLCanvasElement) => void;
-  loadFromJSON: (
-    canvasEl: HTMLCanvasElement,
-    templateJson: CanvasTemplateDataOptions
-  ) => void;
+  // initCanvas: (
+  //   options: Partial<CanvasOptions>
+  //   // canvasEl: HTMLCanvasElement,
+  // ) => void;
+  // loadFromJSON: (
+  //   templateJson: CanvasTemplateDataOptions
+  //   // canvasEl: HTMLCanvasElement,
+  // ) => void;
+  setCanvasState: (canvas: Canvas | undefined) => void;
   setActiveObject: (obj: FabricObject | null) => void;
   activeObject: FabricObject | null;
 }
 
-const CanvasContext2 = createContext<CanvasContextOptions | undefined>(
-  undefined
-);
+export const CanvasContext2 = createContext<CanvasContextOptions>({
+  canvas: undefined,
+  // initCanvas: () => {},
+  // loadFromJSON: () => {},
+  setCanvasState: () => {},
+  setActiveObject: () => {},
+  activeObject: null,
+});
 
 export const useCanvasContext = () => {
   return useContext(CanvasContext2);
@@ -35,22 +45,34 @@ export const CanvasContextProvider = ({
   const [canvas, setCanvas] = useState<Canvas>();
   const [activeObject, setActiveObject] = useState<FabricObject | null>(null);
 
-  const initCanvas = useCallback((canvasEl: HTMLCanvasElement) => {
+  const setCanvasState = (canvas: Canvas | undefined) => {
+    setCanvas(canvas);
+  };
+
+  const initCanvas = useCallback((options: Partial<CanvasOptions>) => {
     const canvasOptions: Partial<CanvasOptions> = {
       preserveObjectStacking: true,
       backgroundColor: "#ffffff",
       defaultCursor: "default",
       selection: true,
     };
-    const initialCanvas = new Canvas(canvasEl, canvasOptions);
+    const initialCanvas = new Canvas("canvas", {
+      ...canvasOptions,
+      ...options,
+    });
     // initAligningGuidelines(initialCanvas)
     initialCanvas.renderAll();
     setCanvas(initialCanvas);
+
+    // () => {
+    //   initialCanvas.removeListeners();
+    //   initialCanvas.dispose();
+    // };
   }, []);
 
   const loadFromJSON = useCallback(
-    (canvasEl: HTMLCanvasElement, templateJson: CanvasTemplateDataOptions) => {
-      const initialCanvas = new Canvas(canvasEl);
+    (templateJson: CanvasTemplateDataOptions) => {
+      const initialCanvas = new Canvas("canvas");
       initialCanvas.loadFromJSON(templateJson.canvasObjectData, () => {
         initialCanvas?.renderAll.bind(initialCanvas);
         initialCanvas.setDimensions({
@@ -60,6 +82,11 @@ export const CanvasContextProvider = ({
       });
       initialCanvas.renderAll();
       setCanvas(initialCanvas);
+
+      () => {
+        initialCanvas.removeListeners();
+        initialCanvas.dispose();
+      };
     },
     []
   );
@@ -68,8 +95,9 @@ export const CanvasContextProvider = ({
     <CanvasContext2.Provider
       value={{
         canvas,
-        initCanvas,
-        loadFromJSON,
+        // initCanvas,
+        // loadFromJSON,
+        setCanvasState,
         activeObject,
         setActiveObject,
       }}
