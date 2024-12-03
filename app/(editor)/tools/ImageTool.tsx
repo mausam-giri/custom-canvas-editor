@@ -1,12 +1,17 @@
 import { ImageIcon } from "@/components/icons";
 import ToolbarIcon from "@/components/ToolbarIcon";
-import { CanvasContext } from "@/context/CanvasContext";
+import { CanvasContext, useCanvasContext } from "@/context/CanvasContext";
 import { FabricImage } from "fabric";
+import { useSearchParams } from "next/navigation";
 import { ChangeEvent, useContext, useRef } from "react";
 
 export default function ImageTool() {
   const fileRef = useRef<HTMLInputElement>(null);
   const canvas = useContext(CanvasContext);
+  // const canvas = useCanvasContext();
+
+  const params = useSearchParams();
+  const userId = params.get("_p");
 
   async function addImage(event: ChangeEvent<HTMLInputElement>) {
     if (event.target.files) {
@@ -14,6 +19,7 @@ export default function ImageTool() {
 
       const formData = new FormData();
       formData.append("image", file);
+      formData.append("userId", userId as string);
 
       const response = await fetch("/api/upload-image", {
         method: "POST",
@@ -23,7 +29,7 @@ export default function ImageTool() {
       if (response.ok) {
         const data = await response.json();
         const imgUrl = data.filePath;
-        console.log(imgUrl);
+        // console.log(imgUrl);
         const imgElem = document.createElement("img");
         imgElem.src = imgUrl;
         imgElem.crossOrigin = "anonymous";
@@ -54,7 +60,13 @@ export default function ImageTool() {
 
   return (
     <>
-      <input type="file" ref={fileRef} onChange={addImage} hidden />
+      <input
+        type="file"
+        ref={fileRef}
+        onChange={addImage}
+        accept="image/*"
+        hidden
+      />
       <ToolbarIcon
         onClick={() => fileRef.current?.click()}
         icon={ImageIcon}

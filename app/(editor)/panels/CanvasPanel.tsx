@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { FabricObject } from "fabric";
 
-import LayersPanel from "./panels/LayersPanel";
-import SettingsPanel from "./panels/SettingsPanel";
-import CanvasSettings from "./settings/CanvasSettings";
+import LayersPanel from "./LayersPanel";
+import SettingsPanel from "./SettingsPanel";
+import CanvasSettings from "../settings/CanvasSettings";
 
 const TABS = {
   Settings: 1,

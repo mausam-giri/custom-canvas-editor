@@ -6,7 +6,7 @@ import ToolbarIcon from "@/components/ToolbarIcon";
 import {
   CanvasTemplateDataOptions,
   useCanvasContext,
-} from "@/context/CanvasContext";
+} from "@/context/_CanvasContext";
 import {
   Canvas,
   CanvasOptions,
@@ -36,40 +36,44 @@ export default function EditorCanvas({
   canvasHeight,
 }: Props) {
   const canvasEl = useRef<HTMLCanvasElement>(null);
-  const { setCanvasState, activeObject, setActiveObject } = useCanvasContext();
+  const { canvas, initCanvas, setCanvasState, activeObject, setActiveObject } =
+    useCanvasContext();
 
-  const initCanvas = useCallback(
-    (options: Partial<CanvasOptions>) => {
-      if (!canvasEl.current) return;
+  //   const initCanvas = useCallback(
+  //     (options: Partial<CanvasOptions>) => {
+  //       if (!canvasEl.current) return;
 
-      const canvasOptions: Partial<CanvasOptions> = {
-        preserveObjectStacking: true,
-        backgroundColor: "#ffffff",
-        selection: true,
-        ...options,
-      };
+  //       const canvasOptions: Partial<CanvasOptions> = {
+  //         preserveObjectStacking: true,
+  //         backgroundColor: "#ffffff",
+  //         selection: true,
+  //         ...options,
+  //       };
 
-      const initialCanvas = new Canvas(canvasEl.current, canvasOptions);
-      initialCanvas.renderAll();
-      setCanvasState(initialCanvas);
+  //       const initialCanvas = new Canvas(canvasEl.current, canvasOptions);
+  //       initialCanvas.renderAll();
+  //       setCanvasState(initialCanvas);
 
-      // Cleanup function for removing listeners and disposing canvas
-      return () => {
-        initialCanvas.removeListeners();
-        initialCanvas.dispose();
-      };
-    },
-    [setCanvasState]
-  );
+  //       // Cleanup function for removing listeners and disposing canvas
+  //       return () => {
+  //         initialCanvas.removeListeners();
+  //         initialCanvas.dispose();
+  //       };
+  //     },
+  //     [setCanvasState]
+  //   );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
+    if (!canvasEl.current) return;
     if (templateJson) {
       //   loadFromJSON(templateJson);
     } else {
-      initCanvas({
-        width: canvasWidth || defaultCanvasDimension.width,
-        height: canvasHeight || defaultCanvasDimension.height,
-      });
+      if (!canvas && canvasEl.current) {
+        initCanvas(canvasEl.current, {
+          width: canvasWidth || defaultCanvasDimension.width,
+          height: canvasHeight || defaultCanvasDimension.height,
+        });
+      }
     }
 
     InteractiveFabricObject.ownDefaults = {
@@ -86,8 +90,11 @@ export default function EditorCanvas({
     //   canvas.setActiveObject(event.target);
     //   canvas.requestRenderAll();
     // });
+    return () => {
+      canvas?.dispose();
+    };
   }, [
-    // canvasEl,
+    canvasEl,
     initCanvas,
     // loadFromJSON,
     templateJson,

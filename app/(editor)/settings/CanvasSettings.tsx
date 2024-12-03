@@ -1,10 +1,15 @@
 import { Input } from "@/components/CustomInput";
 import { CanvasContext } from "@/context/CanvasContext";
 import { FabricImage, TFiller } from "fabric";
+import { useSearchParams } from "next/navigation";
 import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
 
 export default function CanvasSettings() {
   const canvas = useContext(CanvasContext);
+  // const { canvas } = useCanvasContext();
+
+  const params = useSearchParams();
+  const userId = params.get("_p");
 
   const inputColorRef = useRef<HTMLLabelElement>(null);
   const inputBackgroundImageRef = useRef<HTMLInputElement>(null);
@@ -86,12 +91,13 @@ export default function CanvasSettings() {
 
   async function uploadBackgroundImage(e: ChangeEvent<HTMLInputElement>) {
     if (!e.target.files) return;
+    console.log("file selected");
 
     const file = e.target.files[0];
     if (file.type.startsWith("image")) {
       const formData = new FormData();
       formData.append("image", file);
-
+      formData.append("userId", userId as string);
       try {
         const response = await fetch("/api/upload-image", {
           method: "POST",
@@ -103,10 +109,12 @@ export default function CanvasSettings() {
         }
 
         const data = await response.json();
+        // console.log(data, "imagepath");
         const imageUrl = data.filePath;
 
         const imgElem = document.createElement("img");
         imgElem.src = imageUrl;
+        imgElem.crossOrigin = "anonymous";
         imgElem.onload = () => {
           const img = new FabricImage(imgElem, {
             scaleX: canvas!.width / imgElem.width,

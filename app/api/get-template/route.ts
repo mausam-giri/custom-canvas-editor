@@ -14,10 +14,7 @@ export async function POST(request: NextRequest) {
       const templateResponse = await template.json();
 
       return NextResponse.json(
-        {
-          data: templateResponse.data,
-          success: true,
-        },
+        { data: templateResponse.data },
         {
           status: 200,
         }

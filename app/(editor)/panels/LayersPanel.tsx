@@ -13,6 +13,7 @@ import { useContext, useEffect, useState } from "react";
 
 export default function LayersPanel() {
   const canvas = useContext(CanvasContext);
+  // const { canvas } = useCanvasContext();
   const [layers, setLayers] = useState(canvas?.getObjects());
 
   function handleObjectSelected() {
@@ -135,6 +136,7 @@ export default function LayersPanel() {
 
 function ObjectVisibilityComponent(props: { layer: FabricObject }) {
   const canvas = useContext(CanvasContext);
+  // const { canvas } = useCanvasContext();
 
   function handleVisibility() {
     canvas?.discardActiveObject();
@@ -170,9 +172,11 @@ function ObjectVisibilityComponent(props: { layer: FabricObject }) {
 
 function ObjectLockComponent(props: { layer: FabricObject }) {
   const canvas = useContext(CanvasContext);
+  // const { canvas } = useCanvasContext();
 
   function handleLockin() {
     const isUnlocked = props.layer.selectable;
+
     canvas?.discardActiveObject();
     props.layer.set({
       selectable: !isUnlocked,

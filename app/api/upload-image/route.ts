@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 const ensureUploadsDirectory = async (destinationPath: string) => {
   const uploadDir = path.join(process.cwd(), destinationPath);
+  console.log("uploadDir", uploadDir);
   try {
     await mkdir(uploadDir, { recursive: true });
   } catch (err) {
@@ -18,6 +19,8 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("image");
     const userId = formData.get("userId") as string;
+
+    console.log(file, userId, "api/image");
 
     if (!file || !(file instanceof File) || !userId) {
       return NextResponse.json(
@@ -39,10 +42,7 @@ export async function POST(req: NextRequest) {
       path.join(process.cwd(), destinationPath, filename),
       buffer
     );
-    return NextResponse.json(
-      { data: filePath, success: true },
-      { status: 201 }
-    );
+    return NextResponse.json({ filePath, success: true }, { status: 201 });
   } catch (error) {
     console.error("Failed to save uploaded image:", error);
     return NextResponse.json(

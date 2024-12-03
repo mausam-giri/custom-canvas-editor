@@ -9,6 +9,23 @@ const nextConfig = {
             destination: "http://localhost:3001/dashboard/templates/:path*",
             permanent: false
         }]
+    },
+    async headers() {
+        return [
+            {
+                source: '/:path*/uploads/:path*',
+                headers: [
+                    {
+                        key: 'Access-Control-Allow-Origin',
+                        value: '*'
+                    },
+                    {
+                        key: 'Access-Control-Allow-Methods',
+                        value: 'GET, PUT, POST, DELETE, OPTIONS'
+                    },
+                ]
+            }
+        ]
     }
 };
 

@@ -1,5 +1,5 @@
 "use client";
-import { CanvasContextProvider } from "./CanvasContext";
+// import { CanvasContextProvider } from "./CanvasContext";
 import { UserContextProvider } from "./UserContext";
 
 export default function EditorProvider({
@@ -9,7 +9,8 @@ export default function EditorProvider({
 }) {
   return (
     <UserContextProvider>
-      <CanvasContextProvider>{children}</CanvasContextProvider>
+      {children}
+      {/* <CanvasContextProvider>{children}</CanvasContextProvider> */}
     </UserContextProvider>
   );
 }

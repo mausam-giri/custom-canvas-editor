@@ -17,9 +17,10 @@ import ImageTool from "../tools/ImageTool";
 import ToolbarComponent from "../tools/ToolbarComponent";
 import { ActiveSelection } from "fabric";
 import { useSearchParams } from "next/navigation";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { saveAs } from "file-saver";
+import { validateUser } from "@/actions/client.action";
 
 const TOOL_TYPE_MAPPER: Record<string, string> = {
   rect: "Rectangle",
@@ -36,29 +37,47 @@ export default function ToolbarPanel() {
   const name = params.get("_r");
   const id = params.get("_m");
 
+  const [validUser, setUserValid] = useState(false);
+
   const canvas = useContext(CanvasContext);
-  const [canvasJson, setCanvasJson] = useState("{}");
+  // const { canvas } = useCanvasContext();
+  const [canvasJson, setCanvasJson] = useState({
+    canvasWidth: 0,
+    canvasHeight: 0,
+    canvasObjectData: "",
+  });
+
+  const isValidUser = async () => {
+    const res = await validateUser(userId, id);
+    setUserValid(res);
+  };
 
   async function fetchCanvasData() {
     try {
-      const fetchPromise = fetch(
-        "http://localhost:3001/api/editor/get-template",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            userId: userId,
-            id: id,
-          }),
-        }
-      ).then(async (response) => {
+      const fetchPromise = fetch("/api/get-template", {
+        method: "POST",
+        body: JSON.stringify({
+          userId: userId,
+          id: id,
+        }),
+        // mode: "no-cors",
+      }).then(async (response) => {
+        console.log(response, "toolbar");
         if (response.ok) {
           const result = await response.json();
           const templateData = result.data;
+          console.log(templateData, "toolbar-res");
           const { canvasWidth, canvasHeight, canvasObjectData } = templateData;
+          const canvasObjectDataStr = JSON.stringify(canvasObjectData);
           if (!canvasHeight || !canvasWidth || !canvasObjectData)
             throw Error("Invalid template data");
-          canvas?.setDimensions({ width: canvasWidth, height: canvasHeight });
-          setCanvasJson(templateData.canvasObjectData);
+          // canvas?.setDimensions({ width: canvasWidth, height: canvasHeight });
+          // console.log(templateData.canvasObjectData, "oob");
+          setCanvasJson({
+            canvasWidth,
+            canvasHeight,
+            canvasObjectData: JSON.stringify(canvasObjectData),
+          });
           return result;
         } else {
           throw new Error("Failed to fetch data");
@@ -75,14 +94,25 @@ export default function ToolbarPanel() {
     }
   }
   useEffect(() => {
+    // isValidUser();
     fetchCanvasData();
   }, [userId, id]);
 
+  // useEffect(() => {
+  //   fetchCanvasData();
+  // }, [validUser]);
+
   useEffect(() => {
-    if (canvasJson) {
-      canvas?.loadFromJSON(canvasJson, () => {
+    if (canvasJson.canvasObjectData) {
+      console.log("Canvas json received", canvasJson);
+      canvas?.loadFromJSON(canvasJson.canvasObjectData, () => {
+        canvas.setDimensions({
+          width: canvasJson.canvasWidth,
+          height: canvasJson.canvasHeight,
+        });
         canvas.renderAll();
       });
+      // canvas?.requestRenderAll();
     }
   }, [canvasJson]);
 
@@ -116,7 +146,7 @@ export default function ToolbarPanel() {
           canvasObjectData: jsonData,
         },
       };
-      const response = await toast.promise(
+      const response = toast.promise(
         fetch("/api/save-template", {
           method: "POST",
           headers: {
@@ -130,9 +160,7 @@ export default function ToolbarPanel() {
           error: "Failed to save the template. Please try again.",
         }
       );
-
-      const data = await response.json();
-      return data;
+      // return data;
     } catch (error) {
       console.error("Error saving template:", error);
     }
@@ -141,10 +169,12 @@ export default function ToolbarPanel() {
   // Save Template and Close
   async function saveTemplateAndClose() {
     try {
-      await saveTemplate();
+      // await saveTemplate();
 
-      toast("Template saved successfully! Redirecting to templates...", {
-        icon: "➡️",
+      toast.promise(saveTemplate(), {
+        loading: "",
+        success: "➡️ Template saved successfully! Redirecting to templates...",
+        error: "Failed to redirect",
       });
 
       setTimeout(() => {

@@ -35,6 +35,7 @@ import ToolbarIcon from "@/components/ToolbarIcon";
 
 export default function SettingsPanel(props: { activeObject: FabricObject }) {
   const canvas = useContext(CanvasContext);
+  // const { canvas } = useCanvasContext();
   const { activeObject } = props;
   const [activeObjectProps, setActiveObjectProps] = useState<ActiveObjectProps>(
     {

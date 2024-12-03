@@ -16,7 +16,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased bg-gray-200">
         {children}
-        <Toaster closeButton richColors />
+        <Toaster closeButton richColors position="top-right" />
       </body>
     </html>
   );
