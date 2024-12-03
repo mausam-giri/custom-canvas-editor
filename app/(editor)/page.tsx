@@ -131,14 +131,14 @@ export default function CertificateEditor() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === " " || e.key === "h") {
+      if (e.key === "alt" || e.key === "h") {
         setIsPanningEnabled(true);
         document.body.style.cursor = "grab";
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === " " || e.key === "h") {
+      if (e.key === "alt " || e.key === "h") {
         setIsPanningEnabled(false);
         document.body.style.cursor = "default";
       }
