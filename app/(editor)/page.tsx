@@ -184,8 +184,9 @@ export default function CertificateEditor() {
         <div>
           {/* Toolbar Region */}
 {/* Dashboard isn't available to access */}
-{/* <div className=" absolute top-0 left-0 mt-1 px-2 py-1 pb-3 z-[51]">
-            {/* <div className="select-none mt-1 border border-gray-300 w-fit px-2 py-1 rounded-lg shadow-md flex items-center"> */}
+{/*
+<div className=" absolute top-0 left-0 mt-1 px-2 py-1 pb-3 z-[51]">
+            {/*  not usable ::= <div className="select-none mt-1 border border-gray-300 w-fit px-2 py-1 rounded-lg shadow-md flex items-center"> 
             <Link
               href="/dashboard/templates"
               className="bg-white flex items-center text-sm rounded-lg hover:bg-blue-50 hover:text-blue-500 cursor-pointer  border border-gray-300 w-fit px-1 !pr-4 py-1 shadow-md"
@@ -199,8 +200,9 @@ export default function CertificateEditor() {
               />{" "}
               Go Back
             </Link>
-            {/* </div> */}
-          </div> */}
+            {/* not usable ::=  </div> 
+          </div> 
+*/}
 
           <div
             className=" absolute top-0 left-0 w-full px-2 py-1 pb-3 z-[50]"
