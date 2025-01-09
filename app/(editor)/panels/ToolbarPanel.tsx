@@ -274,7 +274,8 @@ export default function ToolbarPanel() {
       </div>
       <span className="px-2 text-gray-500">|</span>
       <div className="flex gap-2 items-center text-gray-700">
-        <ToolbarIcon
+{/*    No datasource available to Save current data      */}
+{/*         <ToolbarIcon
           icon={SaveIcon}
           className="text-blue-500 bg-blue-50 hover:text-blue-500 hover:bg-blue-100"
           title="Save"
@@ -285,7 +286,7 @@ export default function ToolbarPanel() {
           className="text-sm font-medium px-2.5 py-2 rounded-md text-blue-500 bg-blue-50 hover:text-blue-500 hover:bg-blue-100"
         >
           Save & Close
-        </button>
+        </button> */}
       </div>
       <span className="px-2 text-gray-500">|</span>
       <div className="flex gap-2 items-center text-gray-700">
