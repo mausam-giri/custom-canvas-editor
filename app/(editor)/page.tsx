@@ -183,7 +183,8 @@ export default function CertificateEditor() {
       >
         <div>
           {/* Toolbar Region */}
-          <div className=" absolute top-0 left-0 mt-1 px-2 py-1 pb-3 z-[51]">
+{/* Dashboard isn't available to access */}
+{/* <div className=" absolute top-0 left-0 mt-1 px-2 py-1 pb-3 z-[51]">
             {/* <div className="select-none mt-1 border border-gray-300 w-fit px-2 py-1 rounded-lg shadow-md flex items-center"> */}
             <Link
               href="/dashboard/templates"
@@ -199,7 +200,7 @@ export default function CertificateEditor() {
               Go Back
             </Link>
             {/* </div> */}
-          </div>
+          </div> */}
 
           <div
             className=" absolute top-0 left-0 w-full px-2 py-1 pb-3 z-[50]"
