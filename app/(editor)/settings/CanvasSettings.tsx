@@ -99,18 +99,19 @@ export default function CanvasSettings() {
       formData.append("image", file);
       formData.append("userId", userId as string);
       try {
-        const response = await fetch("/api/upload-image", {
-          method: "POST",
-          body: formData,
-        });
+        // const response = await fetch("/api/upload-image", {
+        //   method: "POST",
+        //   body: formData,
+        // });
 
-        if (!response.ok) {
-          throw new Error("Failed to upload the image.");
-        }
+        // if (!response.ok) {
+        //   throw new Error("Failed to upload the image.");
+        // }
 
-        const data = await response.json();
+        // const data = await response.json();
         // console.log(data, "imagepath");
-        const imageUrl = data.filePath;
+        // const imageUrl = data.filePath;
+        const imageUrl = URL.createObjectURL(file);
 
         const imgElem = document.createElement("img");
         imgElem.src = imageUrl;
@@ -217,7 +218,7 @@ export default function CanvasSettings() {
           </div>
         </div>
 {/*         Background Image upload removed */}
-{/*         <div className="space-y-3">
+        <div className="space-y-3">
           <p className="">Background Image</p>
           <div className="text-center">
             <input
@@ -244,7 +245,7 @@ export default function CanvasSettings() {
               Remove Background Image
             </button>
           </div>
-        </div> */}
+        </div>
       </div>
     </div>
   );
