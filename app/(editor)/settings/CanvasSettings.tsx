@@ -216,7 +216,8 @@ export default function CanvasSettings() {
             </div>
           </div>
         </div>
-        <div className="space-y-3">
+{/*         Background Image upload removed */}
+{/*         <div className="space-y-3">
           <p className="">Background Image</p>
           <div className="text-center">
             <input
@@ -243,7 +244,7 @@ export default function CanvasSettings() {
               Remove Background Image
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
