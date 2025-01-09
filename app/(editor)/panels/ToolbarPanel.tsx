@@ -93,9 +93,12 @@ export default function ToolbarPanel() {
       console.error("Error fetching canvas data:", error);
     }
   }
+
+  // Controller Data Source is not available to fetch data based on the search params 
   useEffect(() => {
-    // isValidUser();
-    fetchCanvasData();
+    toast.success("Editor is ready to use!")
+  //   // isValidUser();
+  //   fetchCanvasData();
   }, [userId, id]);
 
   // useEffect(() => {
