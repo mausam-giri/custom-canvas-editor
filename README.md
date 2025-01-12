@@ -1,10 +1,10 @@
 
 # Pramman-Patra Canvas Editor
-
+[Live](https://pramman-editor-v2.vercel.app/)
 <div style="width: 100%;">
-  <img src="public/canvas-editor-ss.png" style="width: 100%; border-radius:16px; box-shadow: 1px 2px 2px rgba(0,0,0,0.5);" alt="Click to see the source">
+  <img src="public/canvas-editor-ss.png" style="width: 100%;" alt="Click to see the source">
 </div>
-[Checkout here](https://pramman-editor-v2.vercel.app/)
+
 
 **Canvas Credential Editor** is an intuitive and powerful canvas-based editor designed to create and customize certificates, credentials, and other formal documents with ease.
 
