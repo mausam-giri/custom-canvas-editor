@@ -75,10 +75,10 @@ export default function ImageTool() {
           canvas?.centerObject(img);
           canvas?.setActiveObject(img);
         }
+      
       } else {
         console.error("Image upload failed");
       }
-    }
   }
 
   return (
