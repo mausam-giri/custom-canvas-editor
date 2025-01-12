@@ -26,6 +26,8 @@ pnpm install
 pnpm run dev
 ```
 
+You are welcome to fork this repo and improve or modify the functionalities. Kindly add a PR if you want to share and integrate the modifications with this project.
+
 ## Built With
 
 * [Next.js](https://nextjs.org/) - The React Framework
