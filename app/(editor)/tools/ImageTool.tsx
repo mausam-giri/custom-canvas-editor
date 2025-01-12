@@ -21,15 +21,38 @@ export default function ImageTool() {
       formData.append("image", file);
       formData.append("userId", userId as string);
 
-      const response = await fetch("/api/upload-image", {
-        method: "POST",
-        body: formData,
-      });
-      console.log(response);
-      if (response.ok) {
-        const data = await response.json();
-        const imgUrl = data.filePath;
-        // console.log(imgUrl);
+      // const response = await fetch("/api/upload-image", {
+      //   method: "POST",
+      //   body: formData,
+      // });
+      // console.log(response);
+      // if (response.ok) {
+      //   const data = await response.json();
+      //   const imgUrl = data.filePath;
+      //   // console.log(imgUrl);
+      //   const imgElem = document.createElement("img");
+      //   imgElem.src = imgUrl;
+      //   imgElem.crossOrigin = "anonymous";
+      //   imgElem.onload = () => {
+      //     const img = new FabricImage(imgElem, {
+      //       label: "Image",
+      //     });
+
+      //     const scaleFactor = Math.min(
+      //       canvas?.width! / img.width,
+      //       canvas?.height! / img.height
+      //     );
+
+      //     img.set({
+      //       scaleX: scaleFactor,
+      //       scaleY: scaleFactor,
+      //     });
+
+      //     canvas?.add(img);
+      //     canvas?.centerObject(img);
+      //     canvas?.setActiveObject(img);
+      //   };
+        const imgUrl = URL.createObjectURL(file);
         const imgElem = document.createElement("img");
         imgElem.src = imgUrl;
         imgElem.crossOrigin = "anonymous";
@@ -51,7 +74,7 @@ export default function ImageTool() {
           canvas?.add(img);
           canvas?.centerObject(img);
           canvas?.setActiveObject(img);
-        };
+        }
       } else {
         console.error("Image upload failed");
       }
